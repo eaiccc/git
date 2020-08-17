@@ -1,0 +1,69 @@
+#!/usr/bin/env python
+"""
+Git commit hook:
+ .git/hooks/commit-msg
+ Check commit message according to angularjs guidelines:
+  * https://docs.google.com/document/d/1QrDFcIiPjSLDn3EL15IJygNPiHORgU1_OOAqWjiDU5Y/edit#
+"""
+
+import sys
+import re
+
+valid_commit_types = ['feat', 'fix', 'docs', 'style', 'refactor', 'test', 'chore', 'perf', 'build', 'ci', 'add', '3rd' ]
+commit_file = sys.argv[1]
+help_address = 'https://docs.google.com/document/d/1QrDFcIiPjSLDn3EL15IJygNPiHORgU1_OOAqWjiDU5Y/edit#'
+
+with open(commit_file) as commit:
+    lines = commit.readlines()
+    i = 1
+    if len(lines) == 0:
+        sys.stderr.write("\nEmpty commit message\n")
+        sys.stderr.write("\n - Refer commit guide: %s\n\n" % help_address)
+        sys.exit(1)
+
+    while i < len(lines):
+      sharpline = lines[i]
+      sharpread = sharpline.find("#", 0, 1)
+      if sharpread == 0:
+        i += 1
+      else:
+        break
+
+    # first line
+    line = lines[i]
+    sys.stderr.write("\n line %s \n" % line)
+    m = re.search('^(.*)\((.*)\): (.*)$', line)
+    commitRe = re.search('^(.*): (.*)$', line)
+
+    if not commitRe or len(commitRe.groups()) != 2:
+        sys.stderr.write("\n line %s \n" % line)
+        sys.stderr.write("\n group l %d \n" % commitRe.groups())
+        sys.stderr.write("\nFirst commit message line (header) does not follow format: type(TFS-id): message\n")
+        sys.stderr.write("\n - Refer commit guide: %s\n\n" % help_address)
+        sys.exit(1)
+
+    commit_type = ""
+    commit_scope = ""
+    commit_message = ""
+
+    if m:
+      commit_type , commit_scope, commit_message = m.groups()
+    elif commitRe:
+      commit_type , commit_message = commitRe.groups()
+
+    if commit_type not in valid_commit_types:
+        sys.stderr.write("\nCommit type not in valid ones: %s\n" % ", ".join(valid_commit_types))
+        sys.stderr.write("\n - Refer commit guide: %s\n\n" % help_address)
+        sys.exit(1)
+
+    if len(lines) > i+1 and lines[i+1].strip():
+        sys.stderr.write("\nSecond commit message line must be empty\n")
+        sys.stderr.write("\n - Refer commit guide: %s\n\n" % help_address)
+        sys.exit(1)
+
+    if len(lines) > i+2 and not lines[i+2].strip():
+        sys.stderr.write("\nThird commit message line (body) must not be empty\n")
+        sys.stderr.write("\n - Refer commit guide: %s\n\n" % help_address)
+        sys.exit(1)
+
+sys.exit(0)
