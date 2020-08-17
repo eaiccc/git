@@ -1,0 +1,11 @@
+# commit log 請遵造以下格式，並注意冒號後面有一個空格
+#
+# 範例
+# feat(23455): implementation login api function
+#
+# finished login module and integration with server login api
+#
+# Closes 23455, 24065
+#
+# 請遵守下列標籤
+# <Type>: feat, fix, refactor, docs, style, perf, test, build, ci, add, 3rd, chore
